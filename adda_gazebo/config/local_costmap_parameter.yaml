@@ -1,0 +1,15 @@
+local_costmap:
+  update_frequency: 10.0 #Hz
+  publish_frequency: 10.0 #Hz
+  rolling_window: false
+  static_map: true
+  resolution: 0.5
+  robot_radius: 0.0
+  footprint_padding: 0.01
+
+  inflation_layer:
+    enabled: true
+    cost_scaling_factor: 0.3
+    inflation_radius: 4.0
+  obstacle_layer:
+    enabled: false

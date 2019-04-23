@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<robot name="sensor_gps" xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <xacro:macro name="sensor_gps" params="prefix parent *origin">
+        <!--Adma GPS -->
+        <joint name="${prefix}_joint" type="fixed">
+            <axis xyz="0 1 0"/>
+            <xacro:insert_block name="origin"/>
+            <parent link="${parent}"/>
+            <child link="${prefix}_chassis"/>
+        </joint>
+        <link name="${prefix}_chassis">
+            <inertial>
+                <mass value="0.001"/>
+                <origin rpy="0 0 0" xyz="0 0 0"/>
+                <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.000001" iyz="0" izz="0.0001"/>
+            </inertial>
+            <visual>
+                <origin rpy="0 0 0" xyz="0 0 0"/>
+                <material name="red">
+                    <color rgba="1 0 0 0.8"/>
+                </material>
+                <geometry>
+                    <box size="0.01 0.01 0.01"/>
+                </geometry>
+            </visual>
+            <collision>
+                <origin rpy="0 0 0" xyz="0 0 0"/>
+                <geometry>
+                    <box size="0.01 0.01 0.01"/>
+                </geometry>
+            </collision>
+        </link>
+        <gazebo reference="${prefix}_chassis">
+            <material>Gazebo/Red</material>
+            <gravity>true</gravity>
+        </gazebo>
+        <gazebo>
+            <plugin filename="libhector_gazebo_ros_gps.so" name="${prefix}_controller">
+                <alwaysOn>false</alwaysOn>
+                <updateRate>10</updateRate>
+                <bodyName>${prefix}_chassis</bodyName>
+                <!-- must be the link of the gps device, not the chassis or base_footprint -->
+                <frameId>${prefix}_chassis</frameId>
+                <topicName>gps/fix</topicName>
+                <!-- Appleton Tower coordinates -->
+                <referenceLatitude>49.9</referenceLatitude>
+                <referenceLongitude>8.9</referenceLongitude>
+                <!-- To set heading in ENU orientation (degrees) -->
+                <velocityTopicName>gps/velocity</velocityTopicName>
+                <drift>0.0 0.0 0.0</drift>
+                <gaussianNoise>0.00001 0.00001 0.00001</gaussianNoise>
+                <velocityDrift>0.0 0.0 0.0</velocityDrift>
+                <velocityGaussianNoise>0.0 0.0 0.0</velocityGaussianNoise>
+            </plugin>
+        </gazebo>
+    </xacro:macro>
+</robot>

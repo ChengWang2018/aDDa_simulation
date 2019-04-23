@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- launches the gazebo simulation with different parameters. To load gazebo worlds, uncomment the according line -->
+    <!-- these are the arguments you can pass this launch file, for example paused:=true rviz:=true -->
+    <arg name="paused" default="false"/>
+    <arg name="use_sim_time" default="true"/>
+    <arg name="gui" default="true"/>
+    <arg name="headless" default="false"/>
+    <arg name="debug" default="false"/>
+    <arg name="rviz" default="false"/>
+    <arg name="namespace" default="adda"/>
+    <arg name="model" default="$(find adda_description)/urdf/car.urdf.xacro"/>
+    <arg name="rvizconfig" default="$(find adda_description)/config/visualization.rviz" />
+
+    <!-- Launch a Gazebo world with default logic -->
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <!--<arg name="world_name" value="$(find adda_gazebo)/worlds/terrain2.sdf"/>-->
+        <arg name="debug" value="$(arg debug)" />
+        <arg name="gui" value="$(arg gui)" />
+        <arg name="paused" value="$(arg paused)"/>
+        <arg name="use_sim_time" value="$(arg use_sim_time)"/>
+        <arg name="headless" value="$(arg headless)"/>
+    </include>
+
+    <!-- loads the robot model and gui param into the param server -->
+    <param name="robot_description" command="$(find xacro)/xacro --inorder $(arg model)" />
+    <param name="use_gui" value="$(arg gui)"/>
+
+    <!-- Spawn the robot in Gazebo, loading the sensor plugins may take some time -->
+    <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" args="-z 0.3 -urdf -model adda -param robot_description" respawn="false" output="screen" />
+    <!-- create tf message for map coordinate frame-->
+    <node name="message_to_tf" pkg="message_to_tf" type="message_to_tf" args="/ground_truth/raw"/>
+    <!-- transforms velocities of the vehicle from world frame to base_link frame -->
+    <node pkg="adda_gazebo" name="ground_truth_transformer" type="ground_truth_transfromer.py" respawn="false"/>
+    <!-- converts cmd_vel(geometry_msgs/twist into ackerman_msgs -->
+    <node pkg="robot_control" name="twist_to_ackermannDrive" type="twist_to_ackermannDrive.py" respawn="false" args="twistToAckermannDrive:=adda_control/teleop_vel_out" />
+    <!-- load ros controller for traction and steering joints with given PID controller file -->
+    <include file="$(find adda_gazebo)/launch/load_controller.launch"/>
+    <!-- starts adda_sim_control node, controlling traction and ackerman steering -->
+    <include file="$(find robot_control)/launch/robot_control.launch"/>
+
+    <!-- Start RVIZ if the argument is set true -->
+    <group if="$(arg rviz)">
+        <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" />
+    </group>
+
+</launch>

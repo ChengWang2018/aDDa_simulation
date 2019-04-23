@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<launch>
+ <!-- these are the arguments you can pass this launch file, for example paused:=true -->
+  <arg name="paused" default="false"/>
+  <arg name="use_sim_time" default="true"/>
+  <arg name="gui" default="true"/>
+  <arg name="headless" default="false"/>
+  <arg name="debug" default="false"/>
+  <arg name="rviz" default="false"/>
+  <arg name="rvizconfig" default="$(find adda_description)/config/visualization.rviz" />
+  <arg name="model" default="$(find adda_description)/urdf/car.urdf.xacro"/>>
+
+  <!-- Launch an empty Gazebo world with default logic -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="debug" value="$(arg debug)" />
+    <arg name="gui" value="$(arg gui)" />
+    <arg name="paused" value="$(arg paused)"/>
+    <arg name="use_sim_time" value="$(arg use_sim_time)"/>
+    <arg name="headless" value="$(arg headless)"/>
+  </include>
+    <rosparam file="$(find adda_gazebo)/config/control.yaml" command="load"/>
+
+    <node name="car_controller_spawner" pkg="controller_manager" type="spawner" ns="/adda" output="screen"
+          args="--namespace=/adda
+          joint_read_state_controller"
+    />
+
+    <!-- loads the robot model and gui (if true) into the param server -->
+  <param name="robot_description" command="$(find xacro)/xacro --inorder $(arg model)" />
+
+  <!-- push robot_description to factory and spawn robot in gazebo -->
+  <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" args="-z 1.0 -unpause -urdf -model robot -param robot_description" respawn="false" output="screen" />
+
+    <!-- open the robot state publisher -->
+    <node name="gazebo_sim_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="false" output="screen">
+        <remap from="/joint_states" to="/adda/joint_states"/>
+    </node>
+
+    <!-- Show in Rviz-->
+    <group if="$(arg rviz)">
+        <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" />
+    </group>
+
+</launch>

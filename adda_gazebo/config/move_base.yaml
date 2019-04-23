@@ -1,0 +1,19 @@
+base_global_planner: global_planner/GlobalPlanner
+#base_local_planner: rsband_local_planner/RSBandPlannerROS
+base_local_planner: teb_local_planner/TebLocalPlannerROS
+
+planner_frequency: 0.0 #Hz
+controller_frequency: 20.0 #Hz
+planner_patience: 10.0 #s
+controller_patience: 15.0 #s
+recovery_behavior_enabled: false
+clearing_rotation_allowed: false
+shutdown_costmaps: false
+oscillation_timeout: 10.0 #s 0.0=infinite
+oscillation_distance: 1.0 #m
+max_planning_retries: 50 #counts -1=infinite
+recovery_behaviors: [
+{name: conservative_reset, type: clear_costmap_recovery/ClearCostmapRecovery},
+{name: rotate_recovery, type: rotate_recovery/RotateRecovery},
+{name: aggressive_reset, type: clear_costmap_recovery/ClearCostmapRecovery}
+]

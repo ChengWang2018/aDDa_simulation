@@ -1,0 +1,21 @@
+RSBandPlannerROS:
+  rear_steering_mode: 0
+  stop: false
+  max_speed: 5.0
+  max_steering_angle: 0.45
+  wheelbase: 3.159
+  xy_goal_tolerance: 1.0
+  yaw_goal_tolerance: 0.4
+  update_sub_goal_dist_threshold: 5.0
+  emergency_planning: true
+  eband_to_rs_strategy: 1
+  state_checking_mode: 1
+  max_planning_duration: 0.1
+  interpolation_num_poses: 20
+  robot_state_valid: false
+  valid_state_max_const: 250
+  allow_unknown: false
+  display_planner_output: false
+  goal_dist_treshold: 2.0
+  lateral_deviation_tolerance: 0.1
+  display_controller_io: false

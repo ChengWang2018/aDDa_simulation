@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<robot name="all_sensors" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <!-- This file unifies all sensors that can be used on simulation, defined as xacro:macros -->
+
+  <!-- Velodyne VLP-16 -->
+  <xacro:include filename="$(find adda_description)/sensors/VLP-16.urdf.xacro"/>
+   <!-- ZED Stereo camera -->
+  <xacro:include filename="$(find adda_description)/sensors/zed.urdf.xarco"/>
+    <!-- Imu hector -->
+  <xacro:include filename="$(find adda_description)/sensors/imu_hector_plugin.urdf.xacro"/>
+  <!-- GPS Hector -->
+  <xacro:include filename="$(find adda_description)/sensors/gps_hector_plugin.urdf.xacro"/>
+  <!-- GPS -->
+  <xacro:include filename="$(find adda_description)/sensors/gps.urdf.xacro"/>
+  <!-- Ground Truth Information -->
+  <xacro:include filename="$(find adda_description)/sensors/ground_truth_odom.urdf.xacro"/>
+
+</robot>

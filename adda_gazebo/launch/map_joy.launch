@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!-- launches map server and gazebo simulation (no pathplanning module) so the car can be controlled by joystick controller after launching it-->
+<launch>
+    <arg name="gui" default="false" />
+    <arg name="map" default="testmap_blank" />
+
+    <!-- Map Server -->
+    <node name="map_server" pkg="map_server" type="map_server" args="$(find adda_gazebo)/maps/$(arg map).yaml">
+        <param name="model" value="adda_vehicle_description"/>
+    </node>
+    <!--Rviz -->
+    <node pkg="rviz" type="rviz" name="map" args="-d $(find adda_gazebo)/config/navigation.rviz" />
+
+    <include file="$(find adda_gazebo)/launch/parametrized.launch">
+        <arg name="gui" value="$(arg gui)"/>
+    </include>
+</launch>

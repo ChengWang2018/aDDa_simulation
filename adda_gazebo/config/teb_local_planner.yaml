@@ -1,0 +1,39 @@
+TebLocalPlannerROS:
+  acc_lim_x: 2.0 #5.66 #m/s²
+  acc_lim_theta: 0.2 #radians/sec² TODO
+  max_vel_x: 13.88 #m/s = 50km/h
+  max_vel_x_backwards: 5.0 #m/s = 18 km/h
+  max_vel_theta: 1.0 #radians/s TODO
+  min_turning_radius: 6.2 #m
+  wheelbase: 3.159 #m
+  cmd_angle_instead_rotvel: true # sets steering angle into the commanded cmd_vel instead of angular velocity
+  max_vel_y: 0.0
+  acc_lim_y: 0.0
+  footprint_model:
+    type: line
+    line_start: [-3.159, 0]
+    line_end: [0, 0]
+  min_obstacle_dist: 1.8 # minimum: 1.3827
+  include_costmap_obstacles: false
+  xy_goal_tolerance: 0.5
+  yaw_goal_tolerance: 0.3
+  free_goal_vel: false
+  max_global_plan_lookahead_dist: 30.0 #m
+  allow_init_with_backwards_motion: true
+  inflation_dist: 3.5
+  obstacle_association_force_inclusion_factor: 3.0
+  obstacle_association_cutoff_factor: 10.0
+  odom_topic: /ground_truth/transformed
+  map_frame: /map
+  feasibility_check_no_poses: 10
+#  weight_max_vel_x: 0.5
+#  weight_optimal_time: 0.5
+#  weight_max_vel_y: 0.0
+  global_plan_viapoint_sep: 5.0
+  via_points_ordered: true
+  teb_feedback: false
+#  weight_kinematics_nh: 1000.0
+#  no_inner_iterations: 5
+#  no_outer_iterations: 4
+#  dt_ref: 0.1
+#  dt_hysteresis: 0.01

@@ -1,0 +1,209 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="aDDa_S450">
+  <!-- Constants -->
+  <xacro:property name="PI"                    value="3.14159265359" />
+
+  <!-- inlcude files -->
+  <xacro:include filename="$(find adda_description)/sensors/all_sensors.urdf.xacro" />
+  <xacro:include filename="$(find adda_description)/urdf/suspension_wheel.urdf.xacro" />
+
+  <!-- Sensor settings-->
+  <!-- if true, gazebo uses the gp_ray controller for the lidar, which means, the visuals of the objects are used for detection instead of collision geometrys-->
+  <xacro:property name="gpu"                   value="false"/>
+
+  <!-- Car Chassis Dimensions -->
+  <!--TODO richtige Fahrzeugmaße für die Kollisionsberechnung einfügen, Reifendistanz justieren und parametrisieren -->
+  <xacro:property name="car_height"            value="1.491" />
+
+  <!-- Body-->
+  <xacro:property name="car_body_length"       value="5.259"/>
+  <xacro:property name="car_body_length_front" value="1.7" /> <!--Motorhaube bis Anfang der Frontscheibe"-->
+  <xacro:property name="car_body_length_back"  value="0.9" />
+  <xacro:property name="car_body_width"        value="2.13" />
+  <xacro:property name="car_body_height"       value="${car_height - car_roof_height}" />
+  
+  <!-- Roof-->
+  <xacro:property name="car_roof_length"      value="${(car_body_length - car_body_length_front - car_body_length_back)}" /> 
+  <xacro:property name="car_roof_width"       value="1.75"  />
+  <xacro:property name="car_roof_height"      value="0.5" />
+
+  <!-- Rooftop 1.0 0.9 0.38-->
+  <xacro:property name="car_rooftop_radius"    value="0.2" />
+  <xacro:property name="car_rooftop_height"   value="0.44" />
+  
+  <!-- Chassis mass -->
+  <!-- Maximum allowed weight and the estimated distribution -->
+  <xacro:property name="car_mass"            value="2735" />  <!-- 2735kg -->
+  <xacro:property name="car_mass_perc_body"  value="0.9" />   <!-- 2461,5 kg -->
+  <xacro:property name="car_mass_perc_roof"  value="0.098" /> <!-- 268,03 kg -->
+  <xacro:property name="car_mass_perc_tire"  value="0.002" /> <!-- 5,47 kg -->
+
+  <!--Tire Position -->
+  <xacro:property name="tire_x"               value="1.1915" />
+  <xacro:property name="tire_y"               value="0.7995" />
+  <xacro:property name="tire_z"              value="0.2" />
+  <xacro:property name="wheel_base"           value="3.159" />
+
+	<!-- Default Inertial distribution -->
+  <xacro:macro name="default_inertial" params="mass">
+    <inertial>
+      <mass value="${mass}" />
+      <inertia ixx="1.0" ixy="0.0" ixz="0.0" 
+               iyy="1.0" iyz="0.0"
+               izz="1.0" />
+    </inertial>
+  </xacro:macro>
+  
+  <!-- Materials (for RVIZ visualization only)-->
+  <material name="grey">
+    <color rgba="0.7 0.7 0.7 1"/>
+  </material>
+  <material name="red">
+    <color rgba="1 0 0 1" />
+  </material>
+  <material name="blue">
+    <color rgba="0 0 1 1" />
+  </material>
+
+
+  <!-- LINK DESCRIPTIONS -->
+  <!-- Virtual Base Link Geometry on the front axis -->
+  <link name="base_link">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.1 0.1 0.1"/>
+      </geometry>
+      <material name="blue"/>
+    </visual>
+    <xacro:default_inertial mass="0.00001"/>
+  </link>
+  <!-- Fixed Joint: Base Link to chassis -->
+  <joint name="base_link_chassis" type="fixed">
+    <parent link="base_link" />
+    <child link="chassis" />
+    <origin xyz="${-tire_x - wheel_base} 0 0" rpy="0 0 0"/>
+  </joint>
+  <!-- The main (lower) body of the car as a box -->
+  <link name="chassis">
+    <visual>
+      <!-- The origin of the chassis is at the center of the back, so we shift the visible and colliding parts -->
+      <geometry>
+        <!-- the visual model is in mm not in m, so scaling down is needed-->
+        <mesh filename="package://adda_description/meshes/car_united_reduced_2.dae" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="grey"/>
+    </visual>
+    <collision>
+     	<origin rpy="0 0 0" xyz="${car_body_length / 2} 0 ${(car_body_height / 2)}"/>
+      <geometry>
+        <box size="${car_body_length} ${car_body_width} ${car_body_height}"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin rpy="0 0 0" xyz="${car_body_length / 2} 0 ${car_body_height / 2}"/>
+      <mass value="${car_mass * car_mass_perc_body}" />
+      <inertia ixx="1.0" ixy="0.0" ixz="0.0" 
+               iyy="1.0" iyz="0.0"
+               izz="1.0" />
+    </inertial>
+  </link>
+  <gazebo reference="chassis">
+		<material>Gazebo/Chrome</material>
+  </gazebo>
+
+  <!-- The upper body of the car as a box -->
+  <link name="roof">
+    <collision>
+      <geometry>
+        <box size="${car_roof_length} ${car_roof_width} ${car_roof_height}"/>
+      </geometry>
+    </collision>
+    <xacro:default_inertial mass="${car_mass * car_mass_perc_roof}"/>
+  </link>
+  <gazebo reference="roof">
+    <laserRetro>0</laserRetro>
+  </gazebo>
+   <!-- Fixed Joint: Chassis to roof -->
+  <joint name="chassis_roof" type="fixed">
+    <parent link="chassis" />
+    <child link="roof" />
+    <origin xyz="${car_body_length - car_body_length_front - (car_roof_length / 2)} 0 ${car_body_height + (car_roof_height / 2)}" />
+  </joint>
+
+  <!-- The rooftop of the car as a box -->
+  <link name="rooftop">
+    <collision>
+      <geometry>
+        <cylinder length="${car_rooftop_height}" radius="${car_rooftop_radius}"/>
+      </geometry>
+    </collision> 
+    <xacro:default_inertial mass="0.0001"/>
+  </link>
+  <gazebo reference="rooftop">
+    <laserRetro>0</laserRetro>
+  </gazebo>
+  <!-- Fixed Joint: Chassis to rooftop -->
+  <joint name="chassis__rooftop" type="fixed">
+    <parent link="chassis" />
+    <child link="rooftop" />
+    <origin xyz="${car_body_length / 2-0.11} 0 ${car_body_height + (car_roof_height) + (car_rooftop_height / 2)}" rpy="0 0 0" />
+  </joint>
+
+
+ <!-- SENSORS -->
+  <!-- Lidar-->
+  <xacro:VLP-16  parent="rooftop" name="velodyne" topic="/velodyne_points" hz="10" samples="1200" gpu="${gpu}">
+      <origin xyz="0 0 0.23" rpy="0 0 0"/>
+  </xacro:VLP-16>-->
+
+  <!-- Stereo Camera modeled as ZED Stereo Camera-->
+  <xacro:zed_camera parent="roof" prefix="zed">
+    <origin xyz="0.85 0 -0.1" rpy="0 0 0"/> 
+  </xacro:zed_camera>
+
+  <!-- ADMA Imu-->
+  <xacro:sensor_imu_hector parent="chassis" prefix="adma_imu">
+    <origin xyz="0.5 0 0.4" rpy="0 0 0"/> 
+  </xacro:sensor_imu_hector>
+
+  <!-- GPS-->
+  <xacro:sensor_gps_hector parent="roof" prefix="vector">
+    <origin xyz="0.6 0 0.4" rpy="0 0 0"/>
+  </xacro:sensor_gps_hector>
+
+  <!-- ADMA GPS-->
+  <xacro:sensor_gps parent="chassis" prefix="adma_gps">
+    <origin xyz="0.5 0 0.4" rpy="0 0 0"/> 
+  </xacro:sensor_gps>
+
+  <!-- Ground Truth Information-->
+  <!-- publishes the exact postion and velocities of the virtual model -->
+  <xacro:ground_truth_odom parent="base_link" prefix="ground_truth">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </xacro:ground_truth_odom>
+
+  <!-- Instanciation of the wheels -->
+  <xacro:front_wheel fr_prefix="front" lr_prefix="right" lr_reflect="1">
+    <origin xyz= "${tire_x + wheel_base} ${-1 * tire_y} ${tire_z}"/>
+  </xacro:front_wheel>
+  <xacro:front_wheel fr_prefix="front" lr_prefix="left" lr_reflect="-1">
+   <origin xyz= "${tire_x + wheel_base} ${tire_y} ${tire_z}"/>
+  </xacro:front_wheel>
+  <xacro:rear_wheel fr_prefix="rear" lr_prefix="right" lr_reflect="1">
+   <origin xyz= "${tire_x } ${-1 * tire_y} ${tire_z}"/>
+  </xacro:rear_wheel>
+  <xacro:rear_wheel fr_prefix="rear" lr_prefix="left" lr_reflect="-1">
+   <origin xyz= "${tire_x} ${tire_y} ${tire_z}"/>
+  </xacro:rear_wheel>
+    <!-- Gazebo plugin for ROS Control -->
+  <gazebo>
+    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+      <controlPeriod>0.001</controlPeriod>
+      <robotNamespace>/adda</robotNamespace>
+      <robotParam>robot_description</robotParam>
+      <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType>
+      <legacyModeNS>false</legacyModeNS>
+    </plugin>
+  </gazebo>
+</robot>

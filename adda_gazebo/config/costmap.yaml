@@ -1,0 +1,9 @@
+global_frame: map
+robot_base_frame: base_link
+update_frequency: 10.0 #Hz
+publish_frequency: 10.0 #Hz
+footprint: [[0.9085, -1.062], [0.9085, 1.062], [-4.3505, 1.062], [-4.3505, -1.062]] #new base_link
+
+lethal_cost: 255
+neutral_cost: 50
+cost_factor: 0.8

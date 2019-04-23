@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<package>
+  <name>adda_gazebo</name>
+  <version>1.0.0</version>
+	<description> This package contains all files, to simulate the adda_desciption vehicle in gazebo. Additionally launch files and maps for a pathplanning module are added. </description>
+  <author email="josef.kinold@stud.tu-darmstadt.de">Josef Kinold</author>
+  <maintainer email="josef.kinold@stud.tu-darmstadt.de">Josef Kinold</maintainer>
+
+  <license>GPL</license>
+ 
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>roslaunch</build_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>rospy</build_depend>
+ 
+  <run_depend>geometry_msgs</run_depend>
+  <run_depend>ackermann_msgs</run_depend>
+  <run_depend>nav_core</run_depend>
+  <run_depend>pluginlib</run_depend>
+  <run_depend>rospy</run_depend>
+  <run_depend>joint_state_publisher</run_depend>
+  <run_depend>robot_state_publisher</run_depend>
+  <run_depend>rviz</run_depend>
+  <run_depend>xacro</run_depend>
+  <run_depend>gazebo</run_depend>
+
+</package>

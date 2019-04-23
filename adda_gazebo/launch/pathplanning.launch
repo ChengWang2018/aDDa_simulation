@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<launch>
+    <!--launches gazbeo simulation and pathplanning module -->
+    <arg name="gui" default="false"/>
+    <arg name="map" default="testmap_blank"/>
+
+    <include file="$(find adda_gazebo)/launch/parametrized.launch">
+        <arg name="gui" value="$(arg gui)"/>
+    </include>
+    <include file="$(find adda_gazebo)/launch/navigation.launch">
+        <arg name="map" value="$(arg map)"/>
+    </include>
+</launch>
+
+

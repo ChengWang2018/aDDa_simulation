@@ -1,0 +1,10 @@
+  
+axis_linear: 1
+scale_linear: 13.88
+scale_linear_turbo: 69.44
+
+axis_angular: 2
+scale_angular: 0.785398163
+
+enable_button: 4  # LB shoulder button
+enable_turbo_button: 5  # RB shoulder button

@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<launch>
+
+  <node name="adda_sim_control" pkg="robot_control" type="robot_control_node" output="screen">
+  	<param name="model" value="adda"/>
+  	<remap from="joint_states" to="adda/joint_states"/>
+    <param name="publish_odom_tf" value="false"/>
+    <param name="wheelbase" value="3.159"/>
+    <param name="wheel_diameter" value="0.678"/>
+    <param name="max_speed" value="69.4444"/>
+    <param name="max_steering" value="0.785398163"/> <!-- 45 degs -->
+  </node> 
+  
+</launch>

@@ -1,0 +1,6 @@
+image: circle.png
+resolution: 1.0 #0.5
+origin: [-6, -4.5, 0.0]
+negate: 0
+occupied_thresh: 0.65 #0.65
+free_thresh: 0.196 #0.196

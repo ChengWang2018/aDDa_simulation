@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<launch>
+  <rosparam file="$(find adda_gazebo)/config/control.yaml" command="load"/>
+  <node name="car_controller_spawner" pkg="controller_manager" type="spawner" ns="adda" output="screen" respawn="true"
+        args="--namespace=/adda
+          left_steering_joint_controller
+          front_left_axle_controller
+          right_steering_joint_controller
+          front_right_axle_controller
+          rear_right_axle_controller
+          rear_left_axle_controller
+          joint_read_state_controller"
+  />
+  <!-- open the robot state publisher-->
+  <node name="gazebo_sim_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="false" output="screen">
+    <remap from="/joint_states" to="/adda/joint_states"/>
+    <param name="publish_frequency" value="10" />
+  </node>
+</launch>

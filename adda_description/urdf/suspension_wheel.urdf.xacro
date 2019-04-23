@@ -1,0 +1,170 @@
+<?xml version="1.0"?>
+<robot name="suspension_wheel" xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <!-- Degree-to-radian conversions -->
+    <xacro:property name="degrees_45"  value="0.785398163"/>
+    <xacro:property name="degrees_90"  value="1.57079633"/>
+    <xacro:property name="degrees_180" value="3.14159265"/>
+    <!-- Tire Dimensions based on tire 245/45/R18 -->
+    <xacro:property name="tire_diameter"        value="0.678" />
+    <xacro:property name="hub_diameter"         value="0.35"/>
+    <xacro:property name="tire_width"           value="0.245" />
+    <xacro:property name="tire_weight"          value="5.47" />
+
+    <!-- Steering Link variables -->
+    <xacro:property name="steering_effort_lim" value="500"/>  <!-- todo -->
+    <xacro:property name="steering_vel_lim" value="50"/> <!-- todo -->
+
+    <!-- Axles-->
+    <xacro:property name="wheel_joint_damping" value="0.01" />
+    <xacro:property name="wheel_joint_friction" value="0.1" />
+    <xacro:property name="axle_eff_limit" value="500"/> <!--todo-->
+    <xacro:property name="axle_vel_limit" value="177.03"/><!--todo-->
+
+    <!-- Null inertial element. This is needed to make the model work with Gazebo -->
+    <xacro:macro name="null_inertial">
+        <inertial>
+            <mass value="0.001"/>
+            <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+        </inertial>
+    </xacro:macro>
+
+    <!-- standard inertia for thick walled tubes, used for the tires-->
+    <xacro:macro name="thick_walled_tube_inertial"
+                 params="inner_rad outer_rad height mass">
+        <inertial>
+            <mass value="${mass}"/>
+            <inertia ixx="${(1 / 12) * mass * (3 * (inner_rad * inner_rad +
+                    outer_rad * outer_rad) + height * height)}"
+                     ixy="0" ixz="0"
+                     iyy="${(1 / 12) * mass * (3 * (inner_rad * inner_rad +
+                    outer_rad * outer_rad) + height * height)}"
+                     iyz="0"
+                     izz="${mass * (inner_rad * inner_rad +
+                    outer_rad * outer_rad) / 2}"/>
+        </inertial>
+    </xacro:macro>
+
+    <!-- Fixed attachment instead of shock absorbers -->
+    <xacro:macro name="shock" params="lr_prefix fr_prefix *origin child">
+        <joint name="${fr_prefix}_${lr_prefix}_shock" type="fixed">
+             <parent link="chassis"/>
+             <child link="${child}"/>
+             <xacro:insert_block name="origin"/>
+        </joint>
+    </xacro:macro>
+    <!-- Steering -->
+    <xacro:macro name="steering" params="lr_prefix fr_prefix ">
+        <link name="${lr_prefix}_steering_link">
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <xacro:thick_walled_tube_inertial
+                    inner_rad="${hub_diameter / 2}" outer_rad="${tire_diameter / 2.0}"
+                    height="${tire_width}" mass="${tire_weight}"/>
+        </link>
+
+        <joint name="${lr_prefix}_steering_joint" type="revolute">
+            <parent link="${lr_prefix}_steering_link"/>
+            <child link="${fr_prefix}_${lr_prefix}_axle_carrier"/>
+            <axis xyz="0 0 1"/>
+            <limit lower="${-degrees_45}" upper="${degrees_45}"
+                   effort="${steering_effort_lim}" velocity="${steering_vel_lim}"/>
+        </joint>
+        <transmission name="${lr_prefix}_steering_trans">
+            <type>transmission_interface/SimpleTransmission</type>
+            <joint name="${lr_prefix}_steering_joint">
+                <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            </joint>
+            <actuator name="${lr_prefix}_steering_act">
+                <mechanicalReduction>1</mechanicalReduction>
+            </actuator>
+        </transmission>
+    </xacro:macro>
+
+    <!-- Axle -->
+    <xacro:macro name="axle" params="lr_prefix fr_prefix">
+        <link name="${fr_prefix}_${lr_prefix}_axle_carrier">
+            <xacro:thick_walled_tube_inertial
+                    inner_rad="${hub_diameter / 2}" outer_rad="${tire_diameter / 2.0}"
+                    height="${tire_width}" mass="${tire_weight}"
+            />
+        </link>
+
+        <!-- The left and right axles have the same axis so that identical
+             rotation values cause the wheels to rotate in the same direction. -->
+        <joint name="${fr_prefix}_${lr_prefix}_axle" type="continuous">
+            <axis xyz="0 -1 0" rpy="0 0 0" />
+            <parent link="${fr_prefix}_${lr_prefix}_axle_carrier"/>
+            <child link="${fr_prefix}_${lr_prefix}_wheel"/>
+            <limit effort="${axle_eff_limit}" velocity="${axle_vel_limit}"/>
+            <joint_properties damping="${wheel_joint_damping}" friction="{wheel_joint_friction}"/>
+        </joint>
+        <!-- This block connects the wheel joint(axle) to an actuator (motor), which informs both
+             simulation and visualization of the robot -->
+        <transmission name="${fr_prefix}_${lr_prefix}_axle_trans">
+            <type>transmission_interface/SimpleTransmission</type>
+            <joint name="${fr_prefix}_${lr_prefix}_axle">
+                <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+            </joint>
+            <actuator name="${fr_prefix}_${lr_prefix}_axle_act">
+                <mechanicalReduction>1</mechanicalReduction>
+            </actuator>
+        </transmission>
+    </xacro:macro>
+    <!-- WHEEL -->
+    <xacro:macro name="wheel" params="fr_prefix lr_prefix lr_reflect">
+        <link name="${fr_prefix}_${lr_prefix}_wheel">
+            <visual>
+                <origin rpy="0 0 ${lr_reflect*degrees_90}" />
+                <geometry>
+                    <mesh filename="package://adda_description/meshes/wheel_normal.dae" scale="0.001 0.001 0.001"/>
+                </geometry>
+                <material name="black"/>
+            </visual>
+            <collision>
+                <origin rpy="${degrees_90} 0 0" />
+                <geometry>
+                    <cylinder length="${tire_width}" radius="${tire_diameter / 2.0}"/>
+                </geometry>
+            </collision>
+            <xacro:thick_walled_tube_inertial
+                    inner_rad="${hub_diameter / 2}" outer_rad="${tire_diameter / 2.0}"
+                    height="${tire_width}" mass="${tire_weight}"/>
+        </link>
+        <!-- This block provides the simulator (Gazebo) with information on a few additional
+        physical properties. See http://gazebosim.org/tutorials/?tut=ros_urdf for more -->
+        <gazebo reference="${fr_prefix}_${lr_prefix}_wheel">
+            <mu1 value="1.0"/>
+            <mu2 value="1.0"/>
+            <kp value="10000000.0" />
+            <kd value="10000000.0" />
+            <fdir1 value="1 0 0"/>
+            <minDepth>0.001</minDepth>
+            <selfCollide>false</selfCollide>
+            <dampingFactor>0.0</dampingFactor>
+            <material>Gazebo/Grey</material>
+        </gazebo>
+    </xacro:macro>
+
+    <!-- Wheel_assembly-->
+
+    <!-- Rear wheel -->
+    <xacro:macro name="rear_wheel" params="lr_prefix fr_prefix lr_reflect *origin">
+        <xacro:shock lr_prefix="${lr_prefix}" fr_prefix="${fr_prefix}"
+                     child="${fr_prefix}_${lr_prefix}_axle_carrier">
+            <xacro:insert_block name ="origin"/>
+        </xacro:shock>
+        <xacro:axle lr_prefix="${lr_prefix}" fr_prefix="${fr_prefix}"/>
+        <xacro:wheel lr_prefix="${lr_prefix}" fr_prefix="${fr_prefix}"
+                     lr_reflect="${lr_reflect}"/>
+    </xacro:macro>
+
+    <!--Front wheel -->
+    <xacro:macro name="front_wheel" params="lr_prefix fr_prefix lr_reflect *origin">
+        <xacro:shock lr_prefix="${lr_prefix}" fr_prefix="${fr_prefix}" child="${lr_prefix}_steering_link">
+            <xacro:insert_block name ="origin"/>
+        </xacro:shock>
+        <xacro:steering lr_prefix="${lr_prefix}" fr_prefix="${fr_prefix}"/>
+        <xacro:axle lr_prefix="${lr_prefix}" fr_prefix="${fr_prefix}"/>
+        <xacro:wheel lr_prefix="${lr_prefix}" fr_prefix="${fr_prefix}"
+                     lr_reflect="${lr_reflect}"/>
+    </xacro:macro>
+</robot>
