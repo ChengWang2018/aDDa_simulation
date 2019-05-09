@@ -12,6 +12,16 @@ The sensors data is published on different ROS topics.
 The car can be controlled by the /cmd_vel message using robot_control GUI, a joystick controller, or the integrated path planning module.
 The path planning module implements the navigation stack, using predefined maps, the global planer and the TEB_local_planner. The module respects kinematic behaviors of the vehicle and is limited at 18.33m/s (50km/h). RVIZ or an action listener can be used to set goals for the planning module. The car will drive to the goal, if possible. Safety distance to obstacles is set to 4m.
 
+To launch the Gazebo simulation run: 
+
+roslaunch adda_gazebo parametrized.launch
+
+It may take some time to start gazebo and load the model. If the tires are not displayed, try to run:
+
+roslaunch adda_gazebo load_controller.launch
+
+The car should spawn in an empty map in gazebo if everything works correctly.
+
 Packages:
 * **adda_description:** contains the description of the aDDa vehicle in URDF format. The meshes folder contaions the meshes used for the visualization. For computers with small computation power I recommend to choose a mesh with a smaller resolution (normal > reduced_1 > reduced_2). The meshes can be exchanged in the URDF file. Visualization_RVIZ launches a visualitation of the URDF model in RVIZ.
 * **adda_gazebo:** contains files necessary to run the URDF model in the Gazbeo simulation and connect it with the path planning module. The control.yaml describes the PID controller which are used in the Hardware Resource Interface Layer as Interface to Gazbeo. The Gazbeo worlds are saved in the world folder, the map folder contains the predefined maps of the path planning module. The node folder contains the ground truth transformer, which transforms the actual velocity of the car into the base_link frame.
