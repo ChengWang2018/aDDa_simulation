@@ -24,3 +24,27 @@ Packages:
 
 If anything is missing, wrong or you want to contribute to the project, I would be happy to receive your email ;)
 Bug reports and feature request are welcome too.
+
+# Installation Guide for required ROS Packages
+
+### For Kinetic
+
+    sudo apt-get install ros-kinetic-navigation
+    sudo apt-get install ros-kinetic-teb-local-planner
+    sudo apt-get install ros-kinetic-gazebo-ros-controller
+    sudo apt-get install ros-kinetic-controller-manager
+    sudo apt-get install ros-kinetic-joint-state-controller
+    sudo apt-get install ros-kinetic-effort-controllers
+    sudo apt-get install ros-kinetic-velocity-controllers
+    sudo apt-get install ros-kinetic-velodyne-gazebo-plugin
+    sudo apt-get install ros-kinetic-joystick-driver
+    sudo apt-get install ros-kinetic-teleop-twist-joy
+    sudo apt-get install ros-kinetic-message-to-tf
+    sudo apt-get install ros-kinetic-ackermann-msgs
+    sudo apt-get install ros-kinetic-hector-gazebo-plugins
+
+
+### In case of errors maybe try
+    
+    sudo apt-get install aptitude
+    sudo aptitude install ros-kinetic-navigation
