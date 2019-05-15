@@ -15,7 +15,7 @@ The sensors data is published on different ROS topics.
 
     sudo apt-get install ros-kinetic-navigation
     sudo apt-get install ros-kinetic-teb-local-planner
-    sudo apt-get install ros-kinetic-gazebo-ros-controller
+    sudo apt-get install ros-kinetic-gazebo-ros-control
     sudo apt-get install ros-kinetic-controller-manager
     sudo apt-get install ros-kinetic-joint-state-controller
     sudo apt-get install ros-kinetic-effort-controllers
